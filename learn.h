@@ -23,6 +23,48 @@
 #include <vppinfra/error.h>
 #include <vppinfra/elog.h>
 
+/*static inline u32
+elog_id_for_msg_name (vlib_main_t * vm, const char *msg_name)
+{
+  uword *p, r;
+  static uword *h;
+  u8 *name_copy;
+
+  if (!h)
+    h = hash_create_string (0, sizeof (uword));
+
+  p = hash_get_mem (h, msg_name);
+  if (p)
+    return p[0];
+  r = elog_string (&vm->elog_main, "%s", msg_name);
+
+  name_copy = format (0, "%s%c", msg_name, 0);
+
+  hash_set_mem (h, name_copy, r);
+
+  return r;
+}*/
+
+/*#define nat_elog(nat_elog_sev, nat_elog_str)                        \
+do                                                                  \
+  {                                                                 \
+    snat_main_t *sm = &snat_main;                                   \
+    if (PREDICT_FALSE (sm->log_level >= SNAT_LOG_INFO))             \
+      {                                                             \
+        ELOG_TYPE_DECLARE (e) =                                     \
+          {                                                         \
+            .format = "nat-msg: (info) %s",                         \
+            .format_args = "T4",                                    \
+          };                                                        \
+        CLIB_PACKED(struct                                          \
+        {                                                           \
+          u32 c;                                                    \
+        }) *ed;                                                     \
+        ed = ELOG_DATA (&sm->vlib_main->elog_main, e);              \
+        ed->c = elog_id_for_msg_name (sm->vlib_main, nat_elog_str); \
+      }                                                             \
+  } while (0);*/
+
 typedef struct {
     /* API message ID base */
     u16 msg_id_base;

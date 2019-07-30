@@ -65,6 +65,11 @@ typedef enum
   LEARN_N_NEXT,
 } learn_next_t;
 
+/**
+ * VLIB_NODE_TYPE_INTERNAL
+ * - only when explicitly made runnable by adding pending frames for processing
+ */
+
 VLIB_NODE_FN (learn_node_internal) (vlib_main_t * vm,
                                     vlib_node_runtime_t * node,
 			            vlib_frame_t * frame)
@@ -143,13 +148,47 @@ VLIB_REGISTER_NODE (learn_node_internal) =
 };
 /* *INDENT-ON* */
 
+/**
+ * VLIB_NODE_TYPE_INPUT
+ * - run as often as possible, after pre_input nodes
+ * - VLIB_NODE_STATE_POLLING - called all the time
+ * - VLIB_NODE_STATE_INTERRUPT - ??
+ */
+
+#include <stdio.h>
+
+static inline int
+learn_vpp_input_node_fn (vlib_main_t *vm,
+		         vlib_node_runtime_t *rt,
+                         vlib_frame_t *f)
+{
+  u32 len;
+  u8 *s = 0;
+
+  // vector is created by itself using vec_add
+  // if the vector doesn't exists ofc
+  //s = vec_new (u8, 0);
+
+  s = format (s, "%d", 100);
+
+  len = vec_len (s);
+
+  vec_terminate_c_string (s);
+
+  fprintf (stderr, "\nlen:%d str:%s", len, s);
+
+  vec_free (s);
+
+  //fprintf (stderr, "\n%s", "shit");
+  return 0;
+}
+
+
 VLIB_NODE_FN (learn_vpp_input) (vlib_main_t *vm,
 		                vlib_node_runtime_t *rt,
                                 vlib_frame_t *f)
 {
-  vlib_node_increment_counter (vm, learn_node_input.index,
-			       LEARN_ERROR_PROCESSED, 1);
-  return 0;
+  return learn_vpp_input_node_fn (vm, rt, f);
 }
 
 /* *INDENT-OFF* */
