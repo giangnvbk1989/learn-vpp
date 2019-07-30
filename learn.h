@@ -23,6 +23,9 @@
 #include <vppinfra/error.h>
 #include <vppinfra/elog.h>
 
+// 0xff & _addr >> 24; 0xff & _addr >> 16;
+// 0xff & _addr >> 8; 0xff & _addr
+
 #define learn_elog_addr(_str, _addr)                 \
 do                                                   \
   {                                                  \
@@ -39,11 +42,53 @@ do                                                   \
         u8 oct4;                                     \
       }) *ed;                                        \
     ed = ELOG_DATA (&vlib_global_main.elog_main, e); \
-    ed->oct1 = nat_elog_addr >> 24 & 0xff;           \
-    ed->oct2 = nat_elog_addr >> 16 & 0xff;           \
-    ed->oct3 = nat_elog_addr >> 8 & 0xff;            \
-    ed->oct4 = nat_elog_addr & 0xff;                 \
+    ed->oct4 = _addr >> 24;                          \
+    ed->oct3 = _addr >> 16;                          \
+    ed->oct2 = _addr >> 8;                           \
+    ed->oct1 = _addr;                                \
   } while (0);
+
+/*static inline u32
+elog_id_for_msg_name (vlib_main_t * vm, const char *msg_name)
+{
+  uword *p, r;
+  static uword *h;
+  u8 *name_copy;
+
+  if (!h)
+    h = hash_create_string (0, sizeof (uword));
+
+  p = hash_get_mem (h, msg_name);
+  if (p)
+    return p[0];
+  r = elog_string (&vm->elog_main, "%s", msg_name);
+
+  name_copy = format (0, "%s%c", msg_name, 0);
+
+  hash_set_mem (h, name_copy, r);
+
+  return r;
+}*/
+
+/*#define nat_elog(nat_elog_sev, nat_elog_str)                        \
+do                                                                  \
+  {                                                                 \
+    snat_main_t *sm = &snat_main;                                   \
+    if (PREDICT_FALSE (sm->log_level >= SNAT_LOG_INFO))             \
+      {                                                             \
+        ELOG_TYPE_DECLARE (e) =                                     \
+          {                                                         \
+            .format = "nat-msg: (info) %s",                         \
+            .format_args = "T4",                                    \
+          };                                                        \
+        CLIB_PACKED(struct                                          \
+        {                                                           \
+          u32 c;                                                    \
+        }) *ed;                                                     \
+        ed = ELOG_DATA (&sm->vlib_main->elog_main, e);              \
+        ed->c = elog_id_for_msg_name (sm->vlib_main, nat_elog_str); \
+      }                                                             \
+  } while (0);*/
 
 typedef struct {
     /* API message ID base */
