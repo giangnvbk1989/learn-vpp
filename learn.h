@@ -23,6 +23,28 @@
 #include <vppinfra/error.h>
 #include <vppinfra/elog.h>
 
+#define learn_elog_addr(_str, _addr)                 \
+do                                                   \
+  {                                                  \
+    ELOG_TYPE_DECLARE (e) =                          \
+      {                                              \
+        .format = _str " %d.%d.%d.%d",               \
+        .format_args = "i1i1i1i1",                   \
+      };                                             \
+    CLIB_PACKED(struct                               \
+      {                                              \
+        u8 oct1;                                     \
+        u8 oct2;                                     \
+        u8 oct3;                                     \
+        u8 oct4;                                     \
+      }) *ed;                                        \
+    ed = ELOG_DATA (&vlib_global_main.elog_main, e); \
+    ed->oct1 = nat_elog_addr >> 24 & 0xff;           \
+    ed->oct2 = nat_elog_addr >> 16 & 0xff;           \
+    ed->oct3 = nat_elog_addr >> 8 & 0xff;            \
+    ed->oct4 = nat_elog_addr & 0xff;                 \
+  } while (0);
+
 typedef struct {
     /* API message ID base */
     u16 msg_id_base;
